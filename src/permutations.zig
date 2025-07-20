@@ -46,9 +46,10 @@ pub fn decode(
             n_rem -= 1;
             continue;
         }
-        if (k_rem > n_rem) {
-            // Not enough space for remaining bits, fill with false
-            result[i] = false;
+
+        if (k_rem == n_rem) {
+            result[i] = true;
+            k_rem -= 1;
             n_rem -= 1;
             continue;
         }

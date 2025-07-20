@@ -1,11 +1,22 @@
 const std = @import("std");
 const big = std.math.big;
+
+/// A pre-computed table of binomial coefficients (nCk), also known as "combinations".
+/// This is used to speed up the encoding and decoding process by providing fast lookups
+/// for the number of combinations of `n` items taken `k` at a time.
+/// The table is stored in a flat array, and the index for a given (n, k) is calculated as `n * (n + 1) / 2 + k`.
 const CombinationsTable = @This();
 
 allocator: std.mem.Allocator,
 max_n: usize,
 table: []big.int.Managed,
 
+/// Initializes a new CombinationsTable, pre-calculating all combinations up to `max_n`.
+/// The table uses `std.math.big.int` to handle large combination values.
+///
+/// * `allocator`: The allocator to use for the table and its big integer entries.
+/// * `max_n`: The maximum value of `n` for which combinations will be calculated and stored.
+/// Returns an initialized `CombinationsTable`. Can fail if allocation fails.
 pub fn init(allocator: std.mem.Allocator, max_n: usize) !CombinationsTable {
     const table_size = (max_n + 1) * (max_n + 2) / 2;
     const table = try allocator.alloc(big.int.Managed, table_size);
@@ -56,10 +67,17 @@ fn deinitTable(table: []big.int.Managed, allocator: std.mem.Allocator) void {
     allocator.free(table);
 }
 
+/// Deinitializes the CombinationsTable, freeing all allocated memory for the table and its entries.
 pub fn deinit(self: *CombinationsTable) void {
     deinitTable(self.table, self.allocator);
 }
 
+/// Retrieves the pre-calculated value of "n choose k" (nCk) from the table.
+///
+/// * `n`: The total number of items.
+/// * `k`: The number of items to choose.
+/// Returns the managed big integer representing the result, or `null` if `n` or `k` are out of bounds
+/// (k > n or n > max_n).
 pub fn get(self: *const CombinationsTable, n: usize, k: usize) ?big.int.Managed {
     if (k > n or n > self.max_n) {
         return null;

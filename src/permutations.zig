@@ -2,6 +2,14 @@ const std = @import("std");
 const big = std.math.big;
 const CombinationsTable = @import("combinations.zig");
 
+/// Encodes a bitset (slice of booleans) into a unique integer rank using combinadics.
+/// The rank represents the lexicographical index of the permutation of set bits.
+///
+/// * `allocator`: The allocator for the resulting big integer rank.
+/// * `table`: A pre-computed `CombinationsTable`. `table.max_n` must be >= `bits.len`.
+/// * `bits`: The input bitset to encode.
+/// * `k`: The number of `true` values (set bits) in `bits`. This is passed for efficiency.
+/// Returns a `std.math.big.int.Managed` representing the rank. Can fail on allocation.
 pub fn encode(allocator: std.mem.Allocator, table: *const CombinationsTable, bits: []const bool, k: usize) !big.int.Managed {
     var rank = try big.int.Managed.init(allocator);
     errdefer rank.deinit();
@@ -24,6 +32,15 @@ pub fn encode(allocator: std.mem.Allocator, table: *const CombinationsTable, bit
     return rank;
 }
 
+/// Decodes a combinadic rank back into its corresponding bitset.
+/// This is the inverse operation of `encode`.
+///
+/// * `allocator`: The allocator for the resulting boolean slice.
+/// * `table`: A pre-computed `CombinationsTable`. `table.max_n` must be >= `n`.
+/// * `rank`: The integer rank to decode.
+/// * `n`: The length of the target bitset.
+/// * `k`: The number of `true` values (set bits) the target bitset should have.
+/// Returns a slice of booleans representing the decoded bitset. Can fail on allocation.
 pub fn decode(
     allocator: std.mem.Allocator,
     table: *const CombinationsTable,

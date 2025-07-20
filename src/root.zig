@@ -1,3 +1,7 @@
+//! Permutation Compression using combinadics.
+//! This library provides functions to encode and decode a bitset into a unique integer (rank).
+//! This is a form of compression useful when the number of set bits is small compared to the total size of the bitset.
+
 const std = @import("std");
 const testing = std.testing;
 const permutations = @import("permutations.zig");
